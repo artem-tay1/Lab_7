@@ -1,0 +1,367 @@
+<html>
+<head>
+<script src="lab_7.js"></script>
+</head>
+<body onload="displayRecords(),enable()">
+Имя:<input type="text" id="firstname" onkeyup="enable()" onblur="enable()"/><br>
+<span id="firstnamemes"></span><br>
+Фамилия:<input type="text" id="surname" onkeyup="enable()" onblur="enable()"/><br>
+<span id="surnamemes"></span><br>
+E-mail:<input type="text" id="email" onkeyup="enable()" onblur="enable()"/><br>
+<span id="emailmes"></span><br>
+Телефон:<input type="text" id="phone" onkeyup="enable()" onblur="enable()"/><br>
+<span id="phonemes"></span><br>
+Дата рождения:<input type="text" id="birthdate" onkeyup="enable()" onblur="enable()"/><br>
+<span id="birthdatemes"></span><br>
+
+<div id="toolbar">
+	<input type="button" id="btn_enable" value="Добавить запись" onclick="send()"/>
+	<input type="text" id="text-to-find" value=""> 
+	<input type="button" onclick="javascript: FindOnPage('text-to-find'); return false;" value="Поиск"/>
+	<input type="button" value="По алфавиту ->" onclick="sort(comparers[0])"/>
+	<input type="button" value="По алфавиту <-" onclick="sort(comparers[1])"/>
+	<input type="button" value="По дате ->" onclick="sort(comparers[0])"/>
+	<input type="button" value="По дате <-" onclick="sort(comparers[1])"/>
+</div>
+<table id="tb">
+</table>
+</body>
+</html>
+
+
+
+
+
+var p1=0;
+var p2=0;
+var p3=0;
+var p4=0;
+var p5=0;
+function Record(firstname,surname,email,phone,birthdate,date,tm) {
+	this.firstname=firstname;
+	this.surname=surname;
+	this.email=email;
+	this.phone=phone;
+	this.birthdate=birthdate;
+	this.date=date;
+	this.tm=tm;
+	this.time=function()
+	{
+		return this.tm.toLocaleTimeString();
+	}
+	this.day=function()
+	{
+		return this.date.toLocaleDateString();
+	}
+}
+
+var records=
+[
+new Record("<strong>Имя</strong>",
+"<strong>Фамилия</strong>",
+"<strong>Email</strong>",
+"<strong>Телефон</strong>",
+"<strong>Дата рождения</strong>",
+"<strong>Дата</strong>",
+"<strong>Время</strong>")
+];
+function time(date)
+{
+	return ""+date.toLocaleTimeString();
+}
+function day(date)
+{
+	return "" + date.toLocaleDateString();
+	
+}
+
+function deleteTable(){
+	var tableHeader=0;
+   var table = document.getElementById("tb");
+   var rowCount = table.rows.length;
+   for (var i = tableHeader; i < rowCount; i++) 
+   {
+      table.deleteRow(tableHeader);
+   }
+}
+function displayRecords(){
+
+var odd = true;
+deleteTable();
+
+var tbl = document.getElementById('tb');
+trs = tbl.getElementsByTagName('tr');
+
+for(var k=0; k < records.length; k++){
+
+	var r = tbl.insertRow(k);
+	r.id = "stroka_"+(k);
+
+	var s = trs[k].insertCell(0);
+	s.innerHTML = records[k].firstname;
+	var s = trs[k].insertCell(1);
+	s.innerHTML = records[k].surname;
+	var s = trs[k].insertCell(2);
+	s.innerHTML = records[k].birthdate;
+	var s = trs[k].insertCell(3);
+	s.innerHTML = records[k].email;
+	var s = trs[k].insertCell(4);
+	s.innerHTML = records[k].phone;
+	var s = trs[k].insertCell(5);
+	if(k==0){
+		s.innerHTML = records[k].date;
+	}
+	else{
+		s.innerHTML = records[k].day();
+	}
+	var s = trs[k].insertCell(6);
+	if(k==0){
+		s.innerHTML = records[k].tm;
+	}
+		else{
+		s.innerHTML = records[k].time();
+	}
+
+
+	if(odd)
+	{
+		document.getElementById("stroka_"+(k)).style.backgroundColor= 'lightgray';
+	}
+	else
+	{
+		document.getElementById("stroka_"+(k)).style.backgroundColor= 'gray'; 
+	}
+	odd = !odd;
+	}
+
+}
+function clear()
+{
+	document.getElementById("firstname").value="";
+	document.getElementById("surname").value="";
+	document.getElementById("email").value="";
+	document.getElementById("phone").value="";
+	document.getElementById("birthdate").value="";
+
+}
+
+
+function send() {
+	var r= new Record(
+	document.getElementById("firstname").value,
+	document.getElementById("surname").value,
+	document.getElementById("email").value,
+	document.getElementById("phone").value,
+	document.getElementById("birthdate").value,
+	new Date(),
+	new Date());
+	records.push(r);
+	displayRecords();
+	clear();
+	enable();
+}
+
+
+
+function sort(compare)
+{
+	var l=records.length;
+	for (var i=0;i<l-1;i++)
+	{
+		var j_min=i;
+		for (var j=i+1;j<l;j++)
+		{
+			if(compare(records[j],records[j_min])){
+				j_min=j;
+			}
+		}
+	var r=records[j_min];
+	records[j_min]=records[i];
+	records[i]=r;
+	}
+	displayRecords();
+}
+var comparers=[
+function comp1(r1,r2){
+	return r1.date<r2.date;
+},
+function comp2(r1,r2){
+	return r1.date>r2.date;
+},
+function comp3(r1,r2)
+{
+	return r1.firstname<r2.firstname;
+},
+function comp4(r1,r2){
+	return r1.firstname>r2.firstname;
+}
+];
+
+var lastResFind=""; 
+var copy_page=""; 
+function TrimStr(s) {
+     s = s.replace( /^\s+/g, '');
+  return s.replace( /\s+$/g, '');
+}
+function FindOnPage(inputId) {
+  var obj = window.document.getElementById(inputId);
+  var textToFind;
+ 
+  if (obj) {
+    textToFind = TrimStr(obj.value);
+  } 
+  else {
+	alert("Введенная фраза не найдена");
+    return;
+  }
+  if (textToFind == "") {
+    alert("Вы ничего не ввели");
+    return;
+  }
+  
+  if(document.body.innerHTML.indexOf(textToFind)=="-1")
+	alert("Ничего не найдено, проверьте правильность ввода!");
+  
+  if(copy_page.length>0)
+        document.body.innerHTML=copy_page;
+  else copy_page=document.body.innerHTML;
+
+  
+  document.body.innerHTML = document.body.innerHTML.replace(eval("/name="+lastResFind+"/gi")," ");
+  document.body.innerHTML = document.body.innerHTML.replace(eval("/"+textToFind+"/gi"),"<a name="+textToFind+" style='background:red'>"+textToFind+"</a>"); 
+  lastResFind=textToFind; 
+  window.location = '#'+textToFind;
+ } 
+	function checkEmpty(field){
+		if(field.value.length==0)
+		{
+			alert("Поле не заполнено!");
+		}
+	}
+	function checkName(field)
+	{
+		label=document.getElementById(field.id+"mes");
+		if(isEmpty(field)){
+			p1=0;
+			p2=0;
+			label.innerHTML="Поле не заполнено!";
+		}
+		else if (isLonger20(field))
+		{
+			label.innerHTML="Введено более 20 символов!";
+			p1=0;
+			p2=0
+		}
+		else if (containsDigits(field)){
+			label.innerHTML="Введены цифры!";
+			p1=0;
+			p2=0
+		}else{
+			label.innerHTML="";
+			p1=1;
+			p2=1;
+		}
+	}
+	function isEmpty(field){
+		return field.value.length==0;
+	}
+	
+	function isLonger20(field){
+		return field.value.length>20;
+	}
+	
+	function containsDigits(field)
+	{
+		var digits="0123456789";
+		for (var i=0;i<digits.length;i++){
+			if(field.value.indexOf(digits[i])!=-1)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	function checkEmail(field)
+	{
+		label=document.getElementById(field.id+"mes");
+		if(isEmpty(field)){
+			p3=0;
+			label.innerHTML="Поле не заполнено!";
+		} else if(!isCorrectEmail(field)){
+			label.innerHTML="Неккоректно введён e-mail!";
+			p3=0;
+		}else{
+			label.innerHTML="";
+			p3=1;
+		}
+	}
+	function isCorrectEmail(field)
+	{
+		var emailRegex=/^\w+@\w+\.\w{2,4}$/;
+		return emailRegex.test(field.value);
+	}
+	function checkPhone (field)
+	{
+		label=document.getElementById(field.id+"mes");
+		if(isEmpty(field)){
+			p4=0;
+			label.innerHTML="Поле не заполнено!";
+		} else if (!isCorrectPhone(field)){
+			label.innerHTML="Некорректно введён телефон";
+			p4=0;
+		}else {
+			label.innerHTML="";
+			p4=1;
+		}
+	}
+	function isCorrectPhone (field){
+		var emailRegex=/^8\d{3}\d{3}\d{2}\d{2}$/;
+		return emailRegex.test(field.value);
+	}
+	function checkDate(field){
+		label=document.getElementById(field.id+"mes");
+		if(isEmpty(field))
+		{
+			p5=0;
+			label.innerHTML="Поле не заполнено!";
+		} else if (!isCorrectDate(field))
+		{
+			label.innerHTML="Неккоректно введена дата!";
+			p5=0;
+		}
+		else if(!isCorrectDateValues(field)){
+			label.innerHTML="Неккоректные значения даты!";
+			p5=0;
+		} else {
+			label.innerHTML="";
+			p5=1;
+		}
+	}
+	function isCorrectDateValues(field){
+		var dd=parseInt(field.value.substring(0,2));
+		var mm=parseInt(field.value.substring(3,5));
+		return 1<=dd && dd<=31 && 1<=mm && mm<=12;
+	}
+	function isCorrectDate(field){
+		var dataRegex=/^\d{2}([.\/-])\d{2}\1\d{4}$/;
+		return dataRegex.test(field.value);
+	}
+
+
+function enable()
+{
+	checkName(document.getElementById("firstname"));
+	checkName(document.getElementById("surname"));
+	checkEmail(document.getElementById("email"));
+	checkPhone(document.getElementById("phone"));
+	checkDate(document.getElementById("birthdate"));
+	var proverka=p1+p2+p3+p4+p5;
+	if(proverka==5)
+	{
+		document.getElementById("btn_enable").disabled=false;
+		
+}else{
+		document.getElementById("btn_enable").disabled=true;
+}
+}
